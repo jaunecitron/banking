@@ -1,0 +1,77 @@
+{
+  "name": "banking",
+  "version": "0.0.0",
+  "description": "Banking API",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist coverage",
+    "commit": "git-cz",
+    "lint": "eslint '**/*.ts'",
+    "lint:fix": "npm run lint -- --fix",
+    "start": "node index.js",
+    "start:local": "ts-node -r dotenv-flow/config index.ts",
+    "start:watch": "nodemon --watch 'src/**/*' --exec ts-node -r dotenv-flow/config index.ts",
+    "test": "jest",
+    "test:coverage": "npm test -- --coverage",
+    "test:watch": "npm test -- --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaunecitron/banking.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaunecitron/banking/issues"
+  },
+  "homepage": "https://github.com/jaunecitron/banking#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^9.0.1",
+    "@commitlint/config-conventional": "^9.0.1",
+    "@types/jest": "^26.0.3",
+    "@typescript-eslint/eslint-plugin": "^3.5.0",
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "^3.2.0",
+    "dotenv-flow": "^3.2.0",
+    "eslint": "^7.3.1",
+    "eslint-config-airbnb-typescript": "^8.0.2",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.20.3",
+    "eslint-plugin-react-hooks": "^2.5.1",
+    "husky": "^4.2.5",
+    "jest": "^26.1.0",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.0.5",
+    "ts-jest": "^26.1.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "husky": {
+    "hooks": {
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
+      "pre-commit": "npm run lint",
+      "pre-push": "npm test"
+    }
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "header-max-length": [
+        1,
+        "always",
+        100
+      ]
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
