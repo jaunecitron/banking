@@ -34,7 +34,7 @@ export const CardWalletService = (
       const card = await cardRepository.getCardById(userId, cardId, { client, lock: true });
 
       const convertedAmout = await convertService.convert(wallet.currency, card.currency, amount);
-      const unloadedWallet = await walletRepository.loadWallet(companyId, walletId, -convertedAmout, { client });
+      const unloadedWallet = await walletRepository.loadWallet(companyId, walletId, -amount, { client });
       const loadedCard = await cardRepository.loadCard(userId, cardId, convertedAmout, { client });
 
       await client.query('COMMIT');
@@ -56,7 +56,7 @@ export const CardWalletService = (
       const wallet = await walletRepository.getWalletById(companyId, card.walletId, { client, lock: true });
 
       const convertedAmout = await convertService.convert(card.currency, wallet.currency, amount);
-      const unloadedCard = await cardRepository.loadCard(userId, cardId, -convertedAmout, { client });
+      const unloadedCard = await cardRepository.loadCard(userId, cardId, -amount, { client });
       const loadedWallet = await walletRepository.loadWallet(companyId, card.walletId, convertedAmout, { client });
 
       await client.query('COMMIT');
