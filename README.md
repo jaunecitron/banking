@@ -5,8 +5,11 @@
 # Table of Contents
 
 - [Requirements](#requirement)
-- [Run locally](#run-locally)
 - [Dependencies](#dependencies)
+- [Install](#install)
+- [Run locally](#run-locally)
+- [APIs](./src/infrastructure/http/README.md)
+- [Test](#test)
 
 ## Requirement
 
@@ -34,6 +37,12 @@ You can configure in your .env file
 
 ```bash
 $ docker-compose up -d
+```
+
+### Initialize your PostgreSQL server
+
+```bash
+$ npm run migration:up:local
 ```
 
 ### Start server locally
