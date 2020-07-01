@@ -1,9 +1,15 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { WalletRequest, Wallet } from '../models/wallet';
 
 export interface WalletRepository {
   createWallet: (wallet: WalletRequest) => Promise<Wallet>;
   listWallet: (companyId: string, options?: { offset?: number; limit?: number }) => Promise<Wallet[]>;
+  loadWallet: (
+    companyId: string,
+    walletId: number,
+    amount: number,
+    options?: { client: PoolClient | Pool },
+  ) => Promise<Wallet | undefined>;
 }
 
 export const WalletRepository = (pool: Pool): WalletRepository => ({
@@ -36,5 +42,25 @@ export const WalletRepository = (pool: Pool): WalletRepository => ({
       [companyId, offset, limit],
     );
     return wallets;
+  },
+
+  async loadWallet(
+    companyId: string,
+    walletId: number,
+    amount: number,
+    { client = pool }: { client?: PoolClient | Pool } = {},
+  ): Promise<Wallet | undefined> {
+    const {
+      rows: [card],
+    } = await client.query(
+      `
+      UPDATE wallet
+      SET balance = balance + $3
+      WHERE company_id = $1 AND id = $2
+      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster"
+    `,
+      [companyId, walletId, amount],
+    );
+    return card;
   },
 });

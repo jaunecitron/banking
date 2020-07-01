@@ -9,6 +9,8 @@ import { WalletRepository } from './repository/wallet';
 import { CardRouter } from './infrastructure/http/card';
 import { CardService } from './service/card';
 import { CardRepository } from './repository/card';
+import { CardWalletRouter } from './infrastructure/http/cardWallet';
+import { CardWalletService } from './service/cardWallet';
 import { pool } from './repository/postgres';
 
 export const startApp = (): http.Server => {
@@ -31,6 +33,11 @@ export const startApp = (): http.Server => {
   const cardRouter = CardRouter(cardService);
   app.use(cardRouter.routes());
   app.use(cardRouter.allowedMethods());
+
+  const cardWalletService = CardWalletService(cardRepository, walletRepository);
+  const cardWalletRouter = CardWalletRouter(cardWalletService);
+  app.use(cardWalletRouter.routes());
+  app.use(cardWalletRouter.allowedMethods());
 
   const server = http.createServer(app.callback());
 

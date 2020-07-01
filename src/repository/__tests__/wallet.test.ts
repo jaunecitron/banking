@@ -50,4 +50,10 @@ describe('Wallet Repository', () => {
     ])('Should fail to list wallet when receive wrong %s', async () => {});
     it.todo('Should successfully list wallet');
   });
+
+  describe('load', () => {
+    it.todo('Should do nothing if company does not have any wallet');
+    it.todo('Should do nothing if wallet does not belong to company');
+    it.todo("Should update user's card balance");
+  });
 });

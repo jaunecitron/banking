@@ -1,10 +1,16 @@
-import { Pool } from 'pg';
+import { Pool, PoolClient } from 'pg';
 import { CardCreationAttempt, Card } from '../models/card';
 import { WalletNotFound } from '../error/wallet';
 
 export interface CardRepository {
   createCard: (card: CardCreationAttempt) => Promise<Card>;
   listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
+  loadCard: (
+    userId: string,
+    cardId: number,
+    amount: number,
+    options?: { client: PoolClient | Pool },
+  ) => Promise<Card | undefined>;
 }
 
 export const CardRepository = (pool: Pool): CardRepository => ({
@@ -58,5 +64,33 @@ export const CardRepository = (pool: Pool): CardRepository => ({
     );
 
     return cards;
+  },
+
+  async loadCard(
+    userId: string,
+    cardId: number,
+    amount: number,
+    { client = pool }: { client?: PoolClient | Pool } = {},
+  ): Promise<Card | undefined> {
+    const {
+      rows: [card],
+    } = await client.query(
+      `
+      UPDATE card
+      SET balance = balance + $3
+      WHERE user_id = $1 AND id = $2
+      RETURNING
+        id,
+        wallet_id AS "walletId",
+        user_id AS "userId",
+        balance,
+        digits,
+        expiration_date AS "expirationDate",
+        ccv,
+        status
+    `,
+      [userId, cardId, amount],
+    );
+    return card;
   },
 });

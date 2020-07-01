@@ -22,4 +22,10 @@ describe('Card Repository', () => {
     ])('Should fail to list card when receive wrong %s', async () => {});
     it.todo('Should successfully list card');
   });
+
+  describe('load', () => {
+    it.todo('Should do nothing if user does not have any card');
+    it.todo('Should do nothing if card does not belong to user');
+    it.todo("Should update user's card balance");
+  });
 });
