@@ -23,7 +23,7 @@ export const ConvertService = (): ConvertService => ({
       .query({ access_key: serverConfig.services.fixerIO.accessKey, base: from, symbols: [to] });
 
     if (!ratesResponse.success || !ratesResponse.rates[to]) {
-      throw new ConvertionRateUnavailable(from, to);
+      throw new ConvertionRateUnavailable(from, to, ratesResponse.error);
     }
     const rawConvertedAmount = amount * ratesResponse.rates[to];
     return rawConvertedAmount - (rawConvertedAmount % 0.01);
