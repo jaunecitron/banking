@@ -12,7 +12,7 @@ const validateQueryMiddleware = async (ctx: Context, next: Next): Promise<void> 
   const validated = queryValidator(ctx.request.body);
   if (!validated) {
     ctx.throw(400, 'Invalid query', {
-      code: 'CREATE_WALLET_INVALID_QUERY',
+      code: 'LIST_WALLET_INVALID_QUERY',
       details: queryValidator.errors,
     });
   }
@@ -25,7 +25,7 @@ const HttpHandler = (walletRepository: WalletRepository) => async (ctx: Context)
   const { companyId, limit, offset } = ctx.state;
   const createdWallet = await walletRepository.listWallet(companyId, { limit, offset });
 
-  ctx.status = 201;
+  ctx.status = 200;
   ctx.body = createdWallet;
 };
 
