@@ -42,4 +42,12 @@ describe('Wallet Repository', () => {
       expect(afterCreationWallets.find((wallet: any) => wallet.id === createdWallet.id)).toEqual(createdWallet);
     });
   });
+
+  describe('list', () => {
+    it.skip.each([
+      ['limit', -1],
+      ['offset', 0.1],
+    ])('Should fail to list wallet when receive wrong %s', async () => {});
+    it.todo('Should successfully list wallet');
+  });
 });
