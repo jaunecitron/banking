@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from 'pg';
-import { CardCreationAttempt, Card } from '../models/card';
+import { CardCreationAttempt, Card, CardStatus } from '../models/card';
 import { CardNotFound } from '../error/card';
 import { WalletNotFound } from '../error/wallet';
 
@@ -8,6 +8,7 @@ export interface CardRepository {
   getCardById: (userId: string, cardId: number, options?: { client: PoolClient | Pool; lock: boolean }) => Promise<Card>;
   listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
   loadCard: (userId: string, cardId: number, amount: number, options?: { client: PoolClient | Pool }) => Promise<Card>;
+  blockCard: (userId: string, cardId: number, options?: { client: PoolClient | Pool }) => Promise<Card>;
 }
 
 export const CardRepository = (pool: Pool): CardRepository => ({
@@ -121,6 +122,35 @@ export const CardRepository = (pool: Pool): CardRepository => ({
         status;
     `,
       [userId, cardId, amount],
+    );
+    if (!card) {
+      throw new CardNotFound(cardId);
+    }
+
+    return card;
+  },
+
+  async blockCard(userId: string, cardId: number, { client = pool }: { client?: PoolClient | Pool } = {}): Promise<Card> {
+    const blockedStatus: CardStatus = 'BLOCKED';
+    const {
+      rows: [card],
+    } = await client.query(
+      `
+      UPDATE card
+      SET status = $3
+      WHERE user_id = $1 AND id = $2
+      RETURNING
+        id,
+        wallet_id AS "walletId",
+        user_id AS "userId",
+        currency,
+        balance,
+        digits,
+        expiration_date AS "expirationDate",
+        ccv,
+        status;
+    `,
+      [userId, cardId, blockedStatus],
     );
     if (!card) {
       throw new CardNotFound(cardId);

@@ -34,4 +34,10 @@ describe('Card Repository', () => {
     it.todo('Should fail if card does not belong to user');
     it.todo("Should update user's card balance");
   });
+
+  describe('block', () => {
+    it.todo('Should fail if user does not have any card');
+    it.todo('Should fail if card does not belong to user');
+    it.todo("Should update user's card status to BLOCKED");
+  });
 });
