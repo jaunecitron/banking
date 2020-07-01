@@ -4,6 +4,7 @@ import { parseEnvString, parseEnvInteger } from './parseEnv';
 export const serverConfig = {
   app: {
     name: parseEnvString('APP_NAME', name),
+    port: parseEnvInteger('APP_PORT'),
   },
   postgres: {
     host: parseEnvString('POSTGRES_HOSTNAME'),

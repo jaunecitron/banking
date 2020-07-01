@@ -38,10 +38,16 @@ $ docker-compose up -d
 
 ### Start server locally
 
+| Environment variable | Description     | Default value |
+| -------------------- | --------------- | ------------- |
+| APP_NAME             | server app name | banking       |
+| APP_PORT             | server app port | 3000          |
+
 ```bash
 $ git clone git@github.com:jaunecitron/banking.git
 $ cd banking
 $ npm install
+$ npm run start:local
 ```
 
 ## Run locally
