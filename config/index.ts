@@ -21,4 +21,11 @@ export const serverConfig = {
       companyId: parseEnvString('AUTHENTICATION_HEADERS_COMPANY_ID', 'x-company-id'),
     },
   },
+  services: {
+    fixerIO: {
+      protocol: parseEnvString('SERVICES_FIXERIO_PROTOCOL'),
+      hostname: parseEnvString('SERVICES_FIXERIO_HOSTNAME'),
+      accessKey: parseEnvString('SERVICES_FIXERIO_ACCESS_KEY'),
+    },
+  },
 };

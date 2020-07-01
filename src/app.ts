@@ -10,6 +10,7 @@ import { CardRouter } from './infrastructure/http/card';
 import { CardService } from './service/card';
 import { CardRepository } from './repository/card';
 import { CardWalletRouter } from './infrastructure/http/cardWallet';
+import { ConvertService } from './infrastructure/service/convert';
 import { CardWalletService } from './service/cardWallet';
 import { pool } from './repository/postgres';
 
@@ -34,7 +35,8 @@ export const startApp = (): http.Server => {
   app.use(cardRouter.routes());
   app.use(cardRouter.allowedMethods());
 
-  const cardWalletService = CardWalletService(cardRepository, walletRepository);
+  const convertService = ConvertService();
+  const cardWalletService = CardWalletService(cardRepository, walletRepository, convertService);
   const cardWalletRouter = CardWalletRouter(cardWalletService);
   app.use(cardWalletRouter.routes());
   app.use(cardWalletRouter.allowedMethods());

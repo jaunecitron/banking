@@ -1,15 +1,12 @@
 import { Pool, PoolClient } from 'pg';
 import { WalletRequest, Wallet } from '../models/wallet';
+import { WalletNotFound } from '../error/wallet';
 
 export interface WalletRepository {
   createWallet: (wallet: WalletRequest) => Promise<Wallet>;
+  getWalletById: (companyId: string, walletId: number, options?: { client: PoolClient | Pool; lock: boolean }) => Promise<Wallet>;
   listWallet: (companyId: string, options?: { offset?: number; limit?: number }) => Promise<Wallet[]>;
-  loadWallet: (
-    companyId: string,
-    walletId: number,
-    amount: number,
-    options?: { client: PoolClient | Pool },
-  ) => Promise<Wallet | undefined>;
+  loadWallet: (companyId: string, walletId: number, amount: number, options?: { client: PoolClient | Pool }) => Promise<Wallet>;
 }
 
 export const WalletRepository = (pool: Pool): WalletRepository => ({
@@ -20,12 +17,38 @@ export const WalletRepository = (pool: Pool): WalletRepository => ({
       `
       INSERT INTO wallet (company_id, currency, balance)
       VALUES ($1, $2, COALESCE($3, 0.0))
-      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster"
+      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster";
     `,
       [wallet.companyId, wallet.currency, wallet.balance],
     );
 
     return createdWallet;
+  },
+
+  async getWalletById(
+    companyId: string,
+    walletId: number,
+    { client = pool, lock = false }: { client?: PoolClient | Pool; lock?: boolean } = {},
+  ): Promise<Wallet> {
+    const {
+      rows: [wallet],
+    } = await client.query(
+      `SELECT
+        id,
+        company_id AS "companyId",
+        balance,
+        currency,
+        is_master AS "isMaster"
+      FROM wallet
+      WHERE company_id = $1 AND id = $2
+      ${lock ? 'FOR UPDATE' : ''};`,
+      [companyId, walletId],
+    );
+    if (!wallet) {
+      throw new WalletNotFound(walletId);
+    }
+
+    return wallet;
   },
 
   async listWallet(companyId: string, { offset = 0, limit = 10 }: { offset?: number; limit?: number } = {}): Promise<Wallet[]> {
@@ -49,18 +72,22 @@ export const WalletRepository = (pool: Pool): WalletRepository => ({
     walletId: number,
     amount: number,
     { client = pool }: { client?: PoolClient | Pool } = {},
-  ): Promise<Wallet | undefined> {
+  ): Promise<Wallet> {
     const {
-      rows: [card],
+      rows: [wallet],
     } = await client.query(
       `
       UPDATE wallet
       SET balance = balance + $3
       WHERE company_id = $1 AND id = $2
-      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster"
+      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster";
     `,
       [companyId, walletId, amount],
     );
-    return card;
+    if (!wallet) {
+      throw new WalletNotFound(walletId);
+    }
+
+    return wallet;
   },
 });

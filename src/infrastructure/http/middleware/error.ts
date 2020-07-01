@@ -7,12 +7,14 @@ export const errorFormaterMiddleware = async (ctx: Context, next: Next): Promise
   } catch (error) {
     if (!error.status) {
       console.error(new VError(error, '[APP] Unexpected error'));
+      ctx.status = 500;
+      ctx.body = { code: 'UNKNOWN_ERROR' };
+    } else {
+      const status = error.status || 500;
+      const code = error.code || 'UNKNOWN_ERROR';
+      const details = error.details || '';
+      ctx.status = status;
+      ctx.body = { code, details };
     }
-    const status = error.status || 500;
-    const code = error.code || 'UNKNOWN_ERROR';
-    const details = error.details || '';
-
-    ctx.status = status;
-    ctx.body = { code, details };
   }
 };

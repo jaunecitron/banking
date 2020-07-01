@@ -43,6 +43,12 @@ describe('Wallet Repository', () => {
     });
   });
 
+  describe('get', () => {
+    it.todo('Should fail if company does not have any wallet');
+    it.todo('Should fail if wallet does not belong to company');
+    it.todo("Should return company's wallet");
+  });
+
   describe('list', () => {
     it.skip.each([
       ['limit', -1],
@@ -52,8 +58,8 @@ describe('Wallet Repository', () => {
   });
 
   describe('load', () => {
-    it.todo('Should do nothing if company does not have any wallet');
-    it.todo('Should do nothing if wallet does not belong to company');
+    it.todo('Should fail if company does not have any wallet');
+    it.todo('Should fail if wallet does not belong to company');
     it.todo("Should update user's card balance");
   });
 });

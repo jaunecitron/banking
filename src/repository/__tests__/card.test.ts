@@ -15,6 +15,12 @@ describe('Card Repository', () => {
     it.todo('should create card in repository');
   });
 
+  describe('get', () => {
+    it.todo('Should fail if user does not have any card');
+    it.todo('Should fail if card does not belong to user');
+    it.todo("Should return user's card");
+  });
+
   describe('list', () => {
     it.skip.each([
       ['limit', -1],
@@ -24,8 +30,8 @@ describe('Card Repository', () => {
   });
 
   describe('load', () => {
-    it.todo('Should do nothing if user does not have any card');
-    it.todo('Should do nothing if card does not belong to user');
+    it.todo('Should fail if user does not have any card');
+    it.todo('Should fail if card does not belong to user');
     it.todo("Should update user's card balance");
   });
 });

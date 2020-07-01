@@ -1,4 +1,4 @@
-describe('Wallet HTTP Handler: Create', () => {
+describe('CardWallet HTTP Handler: LoadCardFromWallet', () => {
   it.todo('Should fail when user is not authenticated');
   it.todo('Should fail load a card from a wallet when amount missing');
   it.skip.each([

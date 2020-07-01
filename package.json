@@ -94,6 +94,7 @@
     "koa-compose": "^4.1.0",
     "koa-router": "^9.1.0",
     "pg": "^8.2.1",
+    "superagent": "^5.3.1",
     "verror": "^1.10.0"
   }
 }

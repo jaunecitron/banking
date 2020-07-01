@@ -1,16 +1,13 @@
 import { Pool, PoolClient } from 'pg';
 import { CardCreationAttempt, Card } from '../models/card';
+import { CardNotFound } from '../error/card';
 import { WalletNotFound } from '../error/wallet';
 
 export interface CardRepository {
   createCard: (card: CardCreationAttempt) => Promise<Card>;
+  getCardById: (userId: string, cardId: number, options?: { client: PoolClient | Pool; lock: boolean }) => Promise<Card>;
   listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
-  loadCard: (
-    userId: string,
-    cardId: number,
-    amount: number,
-    options?: { client: PoolClient | Pool },
-  ) => Promise<Card | undefined>;
+  loadCard: (userId: string, cardId: number, amount: number, options?: { client: PoolClient | Pool }) => Promise<Card>;
 }
 
 export const CardRepository = (pool: Pool): CardRepository => ({
@@ -26,12 +23,12 @@ export const CardRepository = (pool: Pool): CardRepository => ({
           id,
           wallet_id AS "walletId",
           user_id AS "userId",
+          currency,
           balance,
           digits,
           expiration_date AS "expirationDate",
           ccv,
-          status
-        ;
+          status;
       `,
         [card.walletId, card.userId, card.currency, card.digits, card.ccv],
       );
@@ -44,6 +41,38 @@ export const CardRepository = (pool: Pool): CardRepository => ({
     }
   },
 
+  async getCardById(
+    userId: string,
+    cardId: number,
+    { client = pool, lock = false }: { client?: PoolClient | Pool; lock?: boolean } = {},
+  ): Promise<Card> {
+    const {
+      rows: [card],
+    } = await client.query(
+      `
+      SELECT
+        id,
+        wallet_id AS "walletId",
+        user_id AS "userId",
+        currency,
+        balance,
+        digits,
+        expiration_date AS "expirationDate",
+        ccv,
+        status
+      FROM card
+      WHERE user_id = $1 AND id = $2
+      ${lock ? 'FOR UPDATE' : ''};
+    `,
+      [userId, cardId],
+    );
+    if (!card) {
+      throw new CardNotFound(cardId);
+    }
+
+    return card;
+  },
+
   async listCard(userId: string, { offset = 0, limit = 10 }: { offset?: number; limit?: number } = {}): Promise<Card[]> {
     const { rows: cards } = await pool.query(
       `
@@ -51,6 +80,7 @@ export const CardRepository = (pool: Pool): CardRepository => ({
         id,
         wallet_id AS "walletId",
         user_id AS "userId",
+        currency,
         balance,
         digits,
         expiration_date AS "expirationDate",
@@ -58,7 +88,7 @@ export const CardRepository = (pool: Pool): CardRepository => ({
         status
       FROM card
       WHERE user_id = $1
-      OFFSET $2 LIMIT $3
+      OFFSET $2 LIMIT $3;
     `,
       [userId, offset, limit],
     );
@@ -71,7 +101,7 @@ export const CardRepository = (pool: Pool): CardRepository => ({
     cardId: number,
     amount: number,
     { client = pool }: { client?: PoolClient | Pool } = {},
-  ): Promise<Card | undefined> {
+  ): Promise<Card> {
     const {
       rows: [card],
     } = await client.query(
@@ -83,14 +113,19 @@ export const CardRepository = (pool: Pool): CardRepository => ({
         id,
         wallet_id AS "walletId",
         user_id AS "userId",
+        currency,
         balance,
         digits,
         expiration_date AS "expirationDate",
         ccv,
-        status
+        status;
     `,
       [userId, cardId, amount],
     );
+    if (!card) {
+      throw new CardNotFound(cardId);
+    }
+
     return card;
   },
 });
