@@ -1,4 +1,5 @@
 import { pool } from '../repository/postgres';
+import { CardStatus } from '../models/card';
 import { CardWallet } from '../models/cardWallet';
 import { CardRepository } from '../repository/card';
 import { WalletRepository } from '../repository/wallet';
@@ -75,7 +76,8 @@ export const CardWalletService = (
     const client = await pool.connect();
     await client.query('BEGIN');
     try {
-      const card = await cardRepository.blockCard(userId, cardId, { client });
+      const blockedStatus: CardStatus = 'BLOCKED';
+      const card = await cardRepository.updateCardStatus(userId, cardId, blockedStatus, { client });
       const wallet = await walletRepository.getWalletById(companyId, card.walletId, { client, lock: true });
 
       const convertedAmout = await convertService.convert(card.currency, wallet.currency, card.balance);

@@ -8,7 +8,12 @@ export interface CardRepository {
   getCardById: (userId: string, cardId: number, options?: { client: PoolClient | Pool; lock: boolean }) => Promise<Card>;
   listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
   loadCard: (userId: string, cardId: number, amount: number, options?: { client: PoolClient | Pool }) => Promise<Card>;
-  blockCard: (userId: string, cardId: number, options?: { client: PoolClient | Pool }) => Promise<Card>;
+  updateCardStatus: (
+    userId: string,
+    cardId: number,
+    status: CardStatus,
+    options?: { client: PoolClient | Pool },
+  ) => Promise<Card>;
 }
 
 export const CardRepository = (pool: Pool): CardRepository => ({
@@ -130,8 +135,12 @@ export const CardRepository = (pool: Pool): CardRepository => ({
     return card;
   },
 
-  async blockCard(userId: string, cardId: number, { client = pool }: { client?: PoolClient | Pool } = {}): Promise<Card> {
-    const blockedStatus: CardStatus = 'BLOCKED';
+  async updateCardStatus(
+    userId: string,
+    cardId: number,
+    status: CardStatus,
+    { client = pool }: { client?: PoolClient | Pool } = {},
+  ): Promise<Card> {
     const {
       rows: [card],
     } = await client.query(
@@ -150,7 +159,7 @@ export const CardRepository = (pool: Pool): CardRepository => ({
         ccv,
         status;
     `,
-      [userId, cardId, blockedStatus],
+      [userId, cardId, status],
     );
     if (!card) {
       throw new CardNotFound(cardId);
