@@ -12,7 +12,7 @@
     "start": "node index.js",
     "start:local": "ts-node -r dotenv-flow/config index.ts",
     "start:watch": "nodemon --watch 'src/**/*' --exec ts-node -r dotenv-flow/config index.ts",
-    "test": "jest",
+    "test": "jest --forceExit",
     "test:coverage": "npm test -- --coverage",
     "test:watch": "npm test -- --watchAll"
   },
@@ -30,6 +30,7 @@
     "@commitlint/cli": "^9.0.1",
     "@commitlint/config-conventional": "^9.0.1",
     "@types/jest": "^26.0.3",
+    "@types/pg": "^7.14.3",
     "@typescript-eslint/eslint-plugin": "^3.5.0",
     "commitizen": "^4.1.2",
     "cz-conventional-changelog": "^3.2.0",
@@ -73,5 +74,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "dependencies": {
+    "pg": "^8.2.1"
   }
 }
