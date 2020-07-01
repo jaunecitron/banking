@@ -14,4 +14,12 @@ describe('Card Repository', () => {
     it.todo('should fail when wallet does not exist');
     it.todo('should create card in repository');
   });
+
+  describe('list', () => {
+    it.skip.each([
+      ['limit', -1],
+      ['offset', 0.1],
+    ])('Should fail to list card when receive wrong %s', async () => {});
+    it.todo('Should successfully list card');
+  });
 });

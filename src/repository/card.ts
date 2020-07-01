@@ -4,6 +4,7 @@ import { WalletNotFound } from '../error/wallet';
 
 export interface CardRepository {
   createCard: (card: CardCreationAttempt) => Promise<Card>;
+  listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
 }
 
 export const CardRepository = (pool: Pool): CardRepository => ({
@@ -35,5 +36,27 @@ export const CardRepository = (pool: Pool): CardRepository => ({
       }
       throw err;
     }
+  },
+
+  async listCard(userId: string, { offset = 0, limit = 10 }: { offset?: number; limit?: number } = {}): Promise<Card[]> {
+    const { rows: cards } = await pool.query(
+      `
+      SELECT
+        id,
+        wallet_id AS "walletId",
+        user_id AS "userId",
+        balance,
+        digits,
+        expiration_date AS "expirationDate",
+        ccv,
+        status
+      FROM card
+      WHERE user_id = $1
+      OFFSET $2 LIMIT $3
+    `,
+      [userId, offset, limit],
+    );
+
+    return cards;
   },
 });

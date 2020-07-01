@@ -3,6 +3,7 @@ import { CardRepository } from '../repository/card';
 
 export interface CardService {
   createCard: (card: CardRequest) => Promise<Card>;
+  listCard: (userId: string, options?: { offset?: number; limit?: number }) => Promise<Card[]>;
 }
 
 const randomlyChooseNInElements = (n: number, elements: any[]): string =>
@@ -17,4 +18,7 @@ export const CardService = (cardRepository: CardRepository): CardService => ({
     const createdCard = await cardRepository.createCard({ ...card, digits, ccv });
     return createdCard;
   },
+
+  listCard: (userId: string, options?: { offset?: number; limit?: number }): Promise<Card[]> =>
+    cardRepository.listCard(userId, options),
 });
