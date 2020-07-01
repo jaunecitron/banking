@@ -88,9 +88,12 @@
     }
   },
   "dependencies": {
+    "ajv": "^6.12.2",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.3.0",
+    "koa-compose": "^4.1.0",
     "koa-router": "^9.1.0",
-    "pg": "^8.2.1"
+    "pg": "^8.2.1",
+    "verror": "^1.10.0"
   }
 }

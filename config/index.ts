@@ -15,4 +15,10 @@ export const serverConfig = {
     maxPoolConnections: parseEnvInteger('POSTGRES_MAX_POOL_CONNECTIONS', 10),
     idleTimeoutMilliseconds: parseEnvInteger('POSTGRES_IDLE_TIMEOUT_MILLISECONDS', 30000),
   },
+  authentication: {
+    headers: {
+      userId: parseEnvString('AUTHENTICATION_HEADERS_USER_ID', 'x-user-id'),
+      companyId: parseEnvString('AUTHENTICATION_HEADERS_COMPANY_ID', 'x-company-id'),
+    },
+  },
 };
