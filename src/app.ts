@@ -6,6 +6,9 @@ import { errorFormaterMiddleware } from './infrastructure/http/middleware/error'
 import { healthcheckMiddleware } from './infrastructure/http/middleware/healthcheck';
 import { WalletRouter } from './infrastructure/http/wallet';
 import { WalletRepository } from './repository/wallet';
+import { CardRouter } from './infrastructure/http/card';
+import { CardService } from './service/card';
+import { CardRepository } from './repository/card';
 import { pool } from './repository/postgres';
 
 export const startApp = (): http.Server => {
@@ -22,6 +25,12 @@ export const startApp = (): http.Server => {
   const walletRouter = WalletRouter(walletRepository);
   app.use(walletRouter.routes());
   app.use(walletRouter.allowedMethods());
+
+  const cardRepository = CardRepository(pool);
+  const cardService = CardService(cardRepository);
+  const cardRouter = CardRouter(cardService);
+  app.use(cardRouter.routes());
+  app.use(cardRouter.allowedMethods());
 
   const server = http.createServer(app.callback());
 
