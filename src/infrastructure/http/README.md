@@ -8,7 +8,7 @@
 - [Common schemas](#common-schemas)
 - [Wallet APIs](./card/README.md)
 - [Card APIs](./card/README.md)
-- [CardWallet APIs aka Transfer (almost ... 🚀)](./card/README.md)
+- [CardWallet APIs aka Transfer](./card/README.md)
 
 ## Common notions
 

@@ -19,17 +19,17 @@ Type: `JSON`
 
 Type: `JSON`
 
-| Field          | Type   | Format                            | description                 |
-| -------------- | ------ | --------------------------------- | --------------------------- |
-| id             | number | integer                           | card ID                     |
-| walletId       | number | integer                           | wallet ID                   |
-| userId         | string |                                   | user ID                     |
-| currency       | string | [currency](../README.md#currency) | currency                    |
-| digits         | string | [0-9]{16}                         | card digits                 |
-| ccv            | string | [0-9]{3}                          | card ccv                    |
-| expirationDate | string | Date RFC 3339                     | card expiration date        |
-| balance        | number | two decimals number               | card balance                |
-| status         | string |                                   | [card status](#card-status) |
+| Field          | Type   | Format                            | description                |
+| -------------- | ------ | --------------------------------- | -------------------------- |
+| id             | number | integer                           | card ID                    |
+| walletId       | number | integer                           | wallet ID                  |
+| userId         | string |                                   | user ID                    |
+| currency       | string | [currency](../README.md#currency) | currency                   |
+| digits         | string | [0-9]{16}                         | card digits                |
+| ccv            | string | [0-9]{3}                          | card ccv                   |
+| expirationDate | string | Date RFC 3339                     | card expiration date       |
+| balance        | number | two decimals number               | card balance               |
+| status         | string |                                   | [card status](#cardstatus) |
 
 # APIs
 
