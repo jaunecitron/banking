@@ -1,9 +1,13 @@
 import { pool } from '../repository/postgres';
 import { CardStatus } from '../models/card';
 import { CardWallet } from '../models/cardWallet';
+import { TransferEntityKind } from '../models/transfer';
 import { CardRepository } from '../repository/card';
 import { WalletRepository } from '../repository/wallet';
-import { ConvertService } from '../infrastructure/service/convert';
+import { TransferService } from './transfer';
+
+const WALLET_KIND: TransferEntityKind = 'WALLET';
+const CARD_KIND: TransferEntityKind = 'CARD';
 
 export interface CardWalletService {
   loadCardFromWallet: (
@@ -20,7 +24,7 @@ export interface CardWalletService {
 export const CardWalletService = (
   cardRepository: CardRepository,
   walletRepository: WalletRepository,
-  convertService: ConvertService,
+  transferService: TransferService,
 ): CardWalletService => ({
   async loadCardFromWallet(
     userId: string,
@@ -32,16 +36,29 @@ export const CardWalletService = (
     const client = await pool.connect();
     await client.query('BEGIN');
     try {
+      console.log(companyId, walletId);
       const wallet = await walletRepository.getWalletById(companyId, walletId, { client, lock: true });
+      console.log('ah bon ?');
       const card = await cardRepository.getCardById(userId, cardId, { client, lock: true });
 
-      const convertedAmout = await convertService.convert(wallet.currency, card.currency, amount);
-      const unloadedWallet = await walletRepository.loadWallet(companyId, walletId, -amount, { client });
-      const loadedCard = await cardRepository.loadCard(userId, cardId, convertedAmout, { client });
+      const transfer = await transferService.applyTransfer(
+        {
+          userId,
+          companyId,
+          amount,
+          originCurrency: wallet.currency,
+          originId: walletId,
+          originEntity: WALLET_KIND,
+          targetCurrency: card.currency,
+          targetId: cardId,
+          targetEntity: CARD_KIND,
+        },
+        { client },
+      );
 
       await client.query('COMMIT');
-      delete loadedCard[walletId];
-      return { ...loadedCard, wallet: unloadedWallet };
+      delete card.walletId;
+      return { ...card, balance: card.balance + transfer.amount, wallet: { ...wallet, balance: wallet.balance - amount } };
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -57,13 +74,24 @@ export const CardWalletService = (
       const card = await cardRepository.getCardById(userId, cardId, { client, lock: true });
       const wallet = await walletRepository.getWalletById(companyId, card.walletId, { client, lock: true });
 
-      const convertedAmout = await convertService.convert(card.currency, wallet.currency, amount);
-      const unloadedCard = await cardRepository.loadCard(userId, cardId, -amount, { client });
-      const loadedWallet = await walletRepository.loadWallet(companyId, card.walletId, convertedAmout, { client });
+      const transfer = await transferService.applyTransfer(
+        {
+          userId,
+          companyId,
+          amount,
+          originCurrency: card.currency,
+          originId: cardId,
+          originEntity: CARD_KIND,
+          targetCurrency: wallet.currency,
+          targetId: wallet.id,
+          targetEntity: WALLET_KIND,
+        },
+        { client },
+      );
 
       await client.query('COMMIT');
-      delete unloadedCard[card.walletId];
-      return { ...unloadedCard, wallet: loadedWallet };
+      delete card.walletId;
+      return { ...card, balance: card.balance - amount, wallet: { ...wallet, balance: wallet.balance + transfer.amount } };
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;
@@ -80,13 +108,24 @@ export const CardWalletService = (
       const card = await cardRepository.updateCardStatus(userId, cardId, blockedStatus, { client });
       const wallet = await walletRepository.getWalletById(companyId, card.walletId, { client, lock: true });
 
-      const convertedAmout = await convertService.convert(card.currency, wallet.currency, card.balance);
-      const unloadedCard = await cardRepository.loadCard(userId, cardId, -card.balance, { client });
-      const loadedWallet = await walletRepository.loadWallet(companyId, card.walletId, convertedAmout, { client });
+      const transfer = await transferService.applyTransfer(
+        {
+          userId,
+          companyId,
+          amount: card.balance,
+          originCurrency: card.currency,
+          originId: cardId,
+          originEntity: CARD_KIND,
+          targetCurrency: wallet.currency,
+          targetId: wallet.id,
+          targetEntity: WALLET_KIND,
+        },
+        { client },
+      );
 
       await client.query('COMMIT');
-      delete unloadedCard[card.walletId];
-      return { ...unloadedCard, wallet: loadedWallet };
+      delete card[card.walletId];
+      return { ...card, balance: 0, wallet: { ...wallet, balance: wallet.balance + transfer.amount } };
     } catch (err) {
       await client.query('ROLLBACK');
       throw err;

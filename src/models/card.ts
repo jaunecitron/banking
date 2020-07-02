@@ -1,5 +1,7 @@
 import { Currency } from './currency';
 
+export type CardEntity = 'CARD';
+
 export interface CardRequest {
   walletId: number;
   userId: string;

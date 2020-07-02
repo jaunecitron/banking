@@ -24,6 +24,7 @@
     "eol-last": ["error", "always"],
     "import/no-default-export": 2,
     "import/prefer-default-export": "off",
+    "max-classes-per-file": "off",
     "max-len": ["error", { "code": 130, "ignoreTemplateLiterals": true }],
     "no-await-in-loop": "off",
     "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 0, "maxBOF": 0 }],

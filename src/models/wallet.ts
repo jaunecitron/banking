@@ -1,5 +1,7 @@
 import { Currency } from './currency';
 
+export type WalletEntity = 'WALLET';
+
 export interface WalletRequest {
   companyId: string;
   currency: Currency;

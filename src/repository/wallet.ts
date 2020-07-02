@@ -1,12 +1,14 @@
 import { Pool, PoolClient } from 'pg';
+import { Currency } from '../models/currency';
 import { WalletRequest, Wallet } from '../models/wallet';
-import { WalletNotFound } from '../error/wallet';
+import { WalletNotFound, MasterWalletNotFound } from '../error/wallet';
 
 export interface WalletRepository {
   createWallet: (wallet: WalletRequest) => Promise<Wallet>;
   getWalletById: (companyId: string, walletId: number, options?: { client: PoolClient | Pool; lock: boolean }) => Promise<Wallet>;
   listWallet: (companyId: string, options?: { offset?: number; limit?: number }) => Promise<Wallet[]>;
   loadWallet: (companyId: string, walletId: number, amount: number, options?: { client: PoolClient | Pool }) => Promise<Wallet>;
+  loadMasterWallet: (currency: Currency, amount: number, options?: { client: PoolClient | Pool }) => Promise<Wallet>;
 }
 
 export const WalletRepository = (pool: Pool): WalletRepository => ({
@@ -86,6 +88,29 @@ export const WalletRepository = (pool: Pool): WalletRepository => ({
     );
     if (!wallet) {
       throw new WalletNotFound(walletId);
+    }
+
+    return wallet;
+  },
+
+  async loadMasterWallet(
+    currency: Currency,
+    amount: number,
+    { client = pool }: { client?: PoolClient | Pool } = {},
+  ): Promise<Wallet> {
+    const {
+      rows: [wallet],
+    } = await client.query(
+      `
+      UPDATE wallet
+      SET balance = balance + $2
+      WHERE is_master AND currency = $1
+      RETURNING id, company_id AS "companyId", balance, currency, is_master AS "isMaster";
+    `,
+      [currency, amount],
+    );
+    if (!wallet) {
+      throw new MasterWalletNotFound(currency);
     }
 
     return wallet;

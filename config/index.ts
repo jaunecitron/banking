@@ -28,4 +28,7 @@ export const serverConfig = {
       accessKey: parseEnvString('SERVICES_FIXERIO_ACCESS_KEY'),
     },
   },
+  transfer: {
+    fee: parseEnvInteger('TRANSFER_FEE', 0.029),
+  },
 };

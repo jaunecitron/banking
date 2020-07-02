@@ -4,14 +4,24 @@ import { Currency } from '../../models/currency';
 import { ConvertionRateUnavailable } from '../../error/transaction';
 import { serverConfig } from '../../../config';
 
+export interface Conversion {
+  convertedAmount: number;
+  conversionFee: number;
+  timestamp: number;
+}
+
 export interface ConvertService {
-  convert: (from: Currency, to: Currency, amount: number) => Promise<number>;
+  convert: (from: Currency, to: Currency, amount: number) => Promise<Conversion>;
 }
 
 export const ConvertService = (): ConvertService => ({
-  async convert(from: Currency, to: Currency, amount: number): Promise<number> {
+  async convert(from: Currency, to: Currency, amount: number): Promise<Conversion> {
     if (from === to) {
-      return amount;
+      return {
+        convertedAmount: amount,
+        conversionFee: 0,
+        timestamp: Date.now(),
+      };
     }
 
     const endpoint = url.format({
@@ -26,6 +36,10 @@ export const ConvertService = (): ConvertService => ({
       throw new ConvertionRateUnavailable(from, to, ratesResponse.error);
     }
     const rawConvertedAmount = amount * ratesResponse.rates[to];
-    return rawConvertedAmount - (rawConvertedAmount % 0.01);
+    return {
+      convertedAmount: rawConvertedAmount - (rawConvertedAmount % 0.01),
+      conversionFee: ratesResponse.rates[to],
+      timestamp: ratesResponse.timestamp,
+    };
   },
 });
